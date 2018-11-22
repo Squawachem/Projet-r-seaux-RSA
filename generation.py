@@ -44,7 +44,7 @@ def generation_premier(n):
 		for i in range(1,n-1):
 			p += str(random.randint(0,9))
 		p += random.choice('1379')
-	print(p)
+	#print(p)
 	return p
 
 
