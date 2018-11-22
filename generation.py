@@ -20,6 +20,8 @@ random.seed()
 def est_premier(n):
 	""" Optimisable par test de Mil"""
 	p = int(n)
+	if n == 2:
+		return True
 	k = 2	# potentiel diviseur of p 
 	if p==1 or p%k == 0:
 		return False
