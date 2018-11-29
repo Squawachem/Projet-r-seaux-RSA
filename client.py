@@ -4,54 +4,101 @@
 import socket
 import generation.py
 import RSA.py
+from threading import Thread
 
 
 # doit pouvoir être client ET serveur
 
 
 s = socket(AF_INET, SOCK_STREAM)
-port = 7890
-#localhost = '127.0.0.1'
-
+port_defaut = 7890
+localhost = '127.0.0.1'
+help = "[manuel d'utilisation]"
 
 class Ami:
-	def __init__(self, IP, pseudo):
+	def __init__(self, IP, port, pseudo):
 		self.IP = IP
+		self.port = port
 		self.pseudo = pseudo
 
 
 liste_amis = []
 
 
+
 #Thread d'écriture
-while True:
-	com = input()
+class Ecriture(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
 
-	if com[0] == "#":	# com = #connect ou #disconnect
-		if len(com) > 8 and com[1:8] == "connect":
-			IP_ami = com[9:]
-			s.connect( (IP_ami, port) )
+	def run(self):
 
-		# A IMPLEMENTER : gestion de la déconnexion
-		#if len(com) > 10 and com[1:10] == "disconnect":
-		#	IP_disconnect = com[11:]
+		while True:
+			com = input()	# com(mande)
 
-	else:	# commande = envoi de message
-		if liste_amis == []:	# aucune connexion
-			print("Connectez-vous d'abord avec la commande : #connect IP ")
-		else:	# envoi du message 
-			#msg = chiffrement_RSA(com)
+			if com[0] == "#":	# com = "#connect" ou "#disconnect"
+
+				if len(com) > 4 and com[1:] == "help":
+					print(help)
+
+				if len(com) > 8 and com[1:8] == "connect":
+					if com[8:12] == " -p ":	# cas localhost : on donne le port
+						IP_ami = localhost
+						port_ami = com[12:]	# fin de la commande correspond à l'IP
+					else:					# cas IP distante : on donne l'IP
+						IP_ami = com[9:]	
+						port_ami = port_defaut
+
+					try :
+						s.connect( (IP_ami, port_ami) )	
+						liste_amis.append( Ami(IP_ami, port_ami, "NULL") )
+
+
+
+
+					except :
+						print()
+
+				if len(com) > 11 and com[1:11] == "disconnect":
+					IP_ami = com[12:]
+					# A FAIRE : GERER LA DECONNEXION
+
+
+
+			else: 	# commande = envoi de message
+
+				if liste_amis == []:	# aucune connexion
+					print("Connectez-vous d'abord avec la commande : #connect IP ")
+				else:	# envoi du message 
+					# chiffrement_RSA(com)
+					for i in range(len(liste_amis)):
+						s.send(com)
+
+
 
 #Thread de lecture
+class Lecture(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+
+	def run(self):
+		while True:
 
 
 
 
+
+
+E = Ecriture()
+E.start()
+L = Lecture()
+L.start()
 
 
 
 
 ########################################################################################################
+#Je ne sais plus à quoi ça sert:
 
 while msg!="":
 
